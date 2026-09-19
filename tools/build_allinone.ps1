@@ -1,4 +1,4 @@
-# Build the all-in-one HD launcher EXE (payload + enable/disable + launch)
+# Build the all-in-one HD launcher EXE (embeds payload — one file for players)
 $ErrorActionPreference = "Stop"
 $Root = Split-Path -Parent $PSScriptRoot
 Set-Location $Root
@@ -6,7 +6,7 @@ Set-Location $Root
 $python = "C:\Python311\python.exe"
 if (-not (Test-Path $python)) { $python = "python" }
 
-& $python -m pip install --quiet icoextract pillow pyinstaller
+& $python -m pip install --quiet icoextract pillow pyinstaller fonttools
 try {
   & $python launcher\extract_icon.py
 } catch {
@@ -20,12 +20,21 @@ if (-not (Test-Path "launcher\cover.png")) {
   }
 }
 
-if (-not (Test-Path "payload\Resources\common-hd\AmazonToken.png")) {
-  Write-Host "==> HD payload missing. Run: python tools\build_hd_pack.py"
+if (-not (Test-Path "payload\Resources\fonts\arialmt.ttf")) {
+  Write-Host "==> Build OFL UI fonts"
+  & $python tools\build_ui_fonts.py
+}
+
+$payloadProbe = Get-ChildItem "payload\Resources" -Recurse -File -ErrorAction SilentlyContinue |
+  Where-Object { $_.Name -ne ".gitkeep" } |
+  Select-Object -First 1
+if (-not $payloadProbe) {
+  throw "payload/Resources is empty. Run tools\build_hd_pack.py (and related scripts) first."
 }
 
 $icon = Join-Path $Root "launcher\app.ico"
 $cover = Join-Path $Root "launcher\cover.png"
+$payload = (Resolve-Path "payload\Resources").Path
 $pyArgs = @(
   "-m", "PyInstaller",
   "--noconfirm", "--clean", "--windowed", "--onefile",
@@ -40,9 +49,9 @@ $pyArgs = @(
   "--hidden-import", "PIL",
   "--hidden-import", "PIL.Image",
   "--hidden-import", "PIL.ImageTk",
-  "--collect-all", "PIL"
+  "--collect-all", "PIL",
+  "--add-data", "$payload;payload/Resources"
 )
-# Art stays in small-world-hd/payload so this EXE can stay next to SmallWorld-cn.exe.
 if (Test-Path $icon) {
   $pyArgs += @("--icon", (Resolve-Path $icon).Path, "--add-data", "$((Resolve-Path $icon).Path);.")
 }
@@ -51,7 +60,7 @@ if (Test-Path $cover) {
 }
 $pyArgs += @("launcher\app.py")
 
-Write-Host "==> Build SmallWorld-hd.exe"
+Write-Host "==> Build SmallWorld-hd.exe (embedded payload)"
 New-Item -ItemType Directory -Force -Path dist | Out-Null
 & $python @pyArgs
 

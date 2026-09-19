@@ -23,7 +23,7 @@ import overlay  # noqa: E402
 import steam_find  # noqa: E402
 
 APP_TITLE = "小小世界 · HD 画质"
-APP_VERSION = "1.2.1"
+APP_VERSION = "1.3.0"
 BG = "#ffffff"
 SIDE = "#e8f2fc"
 TEXT = "#1a1a1a"

@@ -7,11 +7,15 @@ from pathlib import Path
 
 IMAGE_EXT = {".png", ".jpg", ".jpeg", ".plist"}
 SHADER_SUFFIXES = (".fsh", ".vsh", ".frag", ".vert", "_frag", "_vert")
-FONT_FILES = {
+# Masters only; enable expands Medium → Futura filenames Cocos expects.
+FONT_MASTERS = {
+    "arialmt.ttf": ("arialmt.ttf", "futura-medium.ttf", "futura-condensedmedium.ttf"),
+    "arialboldmt.otf": ("arialboldmt.otf",),
+}
+FONT_FILES = {name for names in FONT_MASTERS.values() for name in names} | {
     "arialmt.ttf",
     "arialboldmt.otf",
-    "futura-medium.ttf",
-    "futura-condensedmedium.ttf",
+    "ofl.txt",
 }
 # Live expansion captions stay soft after window upscale; HD clears them and
 # puts the Chinese title on the card art instead.
@@ -35,15 +39,16 @@ def _has_payload_files(root: Path) -> bool:
 
 
 def bundle_payload_root() -> Path:
-    """Prefer the on-disk payload next to the game so the EXE stays small."""
+    """Frozen EXE prefers the embedded payload so one file is enough for players."""
     candidates: list[Path] = []
     if getattr(sys, "frozen", False):
-        exe = Path(sys.executable).resolve()
-        candidates.append(exe.parent / "small-world-hd" / "payload" / "Resources")
-        if len(exe.parents) > 1:
-            candidates.append(exe.parents[1] / "payload" / "Resources")
         meipass = Path(getattr(sys, "_MEIPASS", ""))
         candidates.append(meipass / "payload" / "Resources")
+        exe = Path(sys.executable).resolve()
+        candidates.append(exe.parent / "small-world-hd" / "payload" / "Resources")
+        candidates.append(exe.parent / "payload" / "Resources")
+        if len(exe.parents) > 1:
+            candidates.append(exe.parents[1] / "payload" / "Resources")
     else:
         candidates.append(Path(__file__).resolve().parents[1] / "payload" / "Resources")
     for path in candidates:
@@ -104,6 +109,15 @@ def collect_files(payload_root: Path | None = None) -> list[tuple[str, Path]]:
             continue
         resolved = path.resolve()
         rel = resolved.relative_to(root).as_posix()
+        # License text ships with fonts but is not installed into the game.
+        if rel.lower() == "fonts/ofl.txt":
+            continue
         validate_rel(rel)
         found.append((rel, resolved))
+        # Expand Medium master into Futura slots Cocos loads by name.
+        if rel == "fonts/arialmt.ttf":
+            for dest_name in FONT_MASTERS["arialmt.ttf"]:
+                if dest_name == "arialmt.ttf":
+                    continue
+                found.append((f"fonts/{dest_name}", resolved))
     return found

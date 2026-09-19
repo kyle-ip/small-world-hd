@@ -16,8 +16,7 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parents[1]
 GAME = ROOT.parent
-ZH_TOOLS = GAME / "small-world-zh-cn" / "tools"
-sys.path.insert(0, str(ZH_TOOLS))
+sys.path.insert(0, str(ROOT / "tools"))
 
 import cnfont  # noqa: E402
 import inpaint_text  # noqa: E402

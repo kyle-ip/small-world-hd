@@ -15,8 +15,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
 GAME = ROOT.parent
-ZH_TOOLS = GAME / "small-world-zh-cn" / "tools"
-sys.path.insert(0, str(ZH_TOOLS))
+sys.path.insert(0, str(ROOT / "tools"))
 
 import localize_images  # noqa: E402
 
