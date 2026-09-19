@@ -1,15 +1,44 @@
 # Small World 2 — HD Pack
 
-Unofficial personal / learning project. Not affiliated with [Days of Wonder](https://www.days-of-wonder.com/), Asmodee, or Valve.
+[![Release](https://img.shields.io/github/v/release/kyle-ip/small-world-hd?label=release)](https://github.com/kyle-ip/small-world-hd/releases/latest)
+[![Platform](https://img.shields.io/badge/platform-Windows-0078D4)](https://github.com/kyle-ip/small-world-hd/releases)
+[![Status](https://img.shields.io/badge/status-unofficial-orange)](#disclaimer)
 
-## For players — one EXE
+Unofficial, reversible **HD texture / polish overlay** for the Steam version of *Small World 2*.
 
-Download **`SmallWorld-hd.exe`** from [Releases](https://github.com/kyle-ip/small-world-hd/releases). It **embeds** the HD payload. No Python, no extra folders, no other downloads.
+A single Windows EXE embeds the full payload. Enable backs up stock files, overlays remastered assets, and can restore everything later. Works alongside the [Simplified Chinese pack](https://github.com/kyle-ip/small-world-zh-cn).
 
-| Button | Action |
-|--------|--------|
-| **启动游戏** | Enables HD if needed, then launches via Steam |
-| **启用 HD / 关闭 HD** | Backup + overlay, or restore from backup |
+> **Not affiliated with** [Days of Wonder](https://www.days-of-wonder.com/), Asmodee, or Valve. Personal / learning use only.
+
+---
+
+## Features
+
+- Same-size clarity pass on `common-hd` and `16-9-hd` (region masks, highlights, and cursors left untouched)
+- Slightly tighter blur / dilation shaders
+- Cleaner Chinese UI plates and expansion card titles (when the Chinese pack is installed)
+- OFL [Noto Sans SC](https://fonts.google.com/noto/specimen/Noto+Sans+SC) fonts under the names the engine already loads
+- Fully reversible: backups under `%LOCALAPPDATA%\SmallWorld2-hd\`
+- One-file player build — no Python, no sidecar folders
+
+## Requirements
+
+| Role | Need |
+|------|------|
+| **Players** | Windows, Steam *Small World 2*, admin rights if the game is under `Program Files` |
+| **Developers** | Python 3.11+, packages in [`requirements.txt`](requirements.txt) |
+
+Steam app ID: `235620`.
+
+## Install (players)
+
+1. Download **`SmallWorld-hd.exe`** from [Releases](https://github.com/kyle-ip/small-world-hd/releases/latest).
+2. Double-click the EXE (no install wizard).
+3. Click **启用 HD**, then **启动游戏** (or start the game from Steam).
+
+Quit *Small World 2* before enabling or disabling. Steam “Verify integrity of game files” restores official assets — run **启用 HD** again afterward.
+
+### CLI
 
 ```bat
 SmallWorld-hd.exe --enable
@@ -19,11 +48,15 @@ SmallWorld-hd.exe --status
 SmallWorld-hd.exe --uninstall
 ```
 
-Backups live in `%LOCALAPPDATA%\SmallWorld2-hd\`. Quit the game before enable/disable. Writes under `Program Files` need Administrator. Steam “Verify integrity” restores stock files — enable HD again afterward.
+| Flag | Meaning |
+|------|---------|
+| `--enable` / `--install` | Backup originals and apply the overlay |
+| `--disable` | Restore from backup (keeps backups for a fast re-enable) |
+| `--launch` | Enable if needed, then start via Steam |
+| `--status` | Print enable state and payload file count |
+| `--uninstall` | Restore, then delete local HD config / backups |
 
-Compatible with the unofficial Chinese pack ([small-world-zh-cn](https://github.com/kyle-ip/small-world-zh-cn)).
-
-## For developers — clone and build
+## Development
 
 ```bat
 git clone https://github.com/kyle-ip/small-world-hd.git
@@ -32,21 +65,15 @@ python -m pip install -r requirements.txt
 python launcher\app.py
 ```
 
-The repo includes a complete `payload/Resources/` tree (textures, shaders, OFL CJK fonts, Chinese plates). Clone alone is enough to run the launcher or rebuild the EXE:
+The clone already contains a complete `payload/Resources/` tree. That is enough to run the launcher or rebuild the player EXE:
 
 ```bat
 powershell -ExecutionPolicy Bypass -File tools\build_allinone.ps1
 ```
 
-Layout:
+### Optional regeneration
 
-```text
-payload/     HD assets embedded into the EXE at build time
-launcher/    GUI / overlay / Steam helper
-tools/       rebuild scripts (clarity pack, Chinese plates, fonts, verify)
-```
-
-Optional regeneration (needs a local Small World 2 install; some Chinese-plate scripts also need the English `.lproj` backup created by the Chinese pack):
+Requires a local *Small World 2* install. Some Chinese-plate scripts also need the English `.lproj` backup created by [small-world-zh-cn](https://github.com/kyle-ip/small-world-zh-cn).
 
 ```bat
 python tools\build_hd_pack.py
@@ -57,16 +84,25 @@ python tools\build_ui_fonts.py
 python tools\verify_overlay.py --no-live
 ```
 
-Rules when editing art: keep official HD filenames and pixel sizes; do not change region detection masks; Chinese plates only under `zh.lproj`.
+When editing art: keep official HD **filenames and pixel sizes**; do not change region detection masks; put Chinese plates only under `zh.lproj`.
 
-## What the pack changes
+### Repository layout
 
-- Same-size clarity pass on `common-hd` / `16-9-hd` (region masks / highlights / cursors skipped)
-- Slightly tighter blur / dilation shaders
-- Clean Chinese UI plates; expansion setup titles on card thumbs at a shared size
-- OFL Noto Sans SC UI fonts under the names Cocos already loads
-- Soft live expansion under-card captions cleared while HD is on
+```text
+payload/     HD assets (embedded into the EXE at build time)
+launcher/    GUI, reversible overlay, Steam helpers
+tools/       Build, verify, and optional regeneration scripts
+```
+
+## Related projects
+
+- [small-world-zh-cn](https://github.com/kyle-ip/small-world-zh-cn) — unofficial Simplified Chinese language pack (same launcher style)
 
 ## Disclaimer
 
-For personal learning only. Do not sell this patch. Do not redistribute the game binary. Bundled CJK fonts are [Noto Sans SC](https://fonts.google.com/noto/specimen/Noto+Sans+SC) (SIL OFL).
+This is an unofficial fan project for personal learning.
+
+- Do **not** sell this patch.
+- Do **not** redistribute *Small World 2* or official Days of Wonder assets as a standalone game dump.
+- Bundled CJK fonts are **Noto Sans SC** ([SIL Open Font License](https://scripts.sil.org/OFL)).
+- Use at your own risk; always keep Steam verify / the built-in disable path available.
