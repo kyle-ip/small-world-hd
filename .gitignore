@@ -1,0 +1,21 @@
+__pycache__/
+*.py[cod]
+dist/
+build/
+*.spec
+.DS_Store
+Thumbs.db
+
+# Generated / derivative art stays local. Do not commit official or remixed game images.
+payload/Resources/**/*.png
+payload/Resources/**/*.jpg
+payload/Resources/**/*.jpeg
+payload/Resources/**/*.plist
+payload/Resources/**/*.fsh
+payload/Resources/**/*.vsh
+payload/Resources/**/*.ttf
+payload/Resources/**/*.otf
+tools/models/*.pb
+tools/_preview/
+launcher/app.ico
+launcher/cover.png
